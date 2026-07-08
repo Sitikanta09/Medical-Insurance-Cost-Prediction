@@ -3,7 +3,7 @@ import pickle
 import numpy as np
 from werkzeug.security import generate_password_hash, check_password_hash
 
-app = Flask(__name__, template_folder='tempplates')
+app = Flask(__name__, template_folder='templates')
 import os
 
 app.secret_key = os.environ.get("SECRET_KEY", "medicalinsurance123")  # For session management
@@ -73,7 +73,7 @@ def predict():
 
         return render_template('result.html', prediction_text=f"Estimated Insurance Cost: Rs.{prediction:,.2f}")
     except Exception:
-    return render_template(
+        return render_template(
         "result.html",
         prediction_text="Invalid input. Please enter valid values."
     )

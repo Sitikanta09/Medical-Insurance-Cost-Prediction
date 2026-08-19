@@ -80,3 +80,13 @@ The model accepts the following six features:
 
 ```text
 [age, sex, bmi, children, smoker, region]
+
+---
+
+## 👨‍💻 Author
+
+### Sitikanta Dash
+
+**MCA | Software Development | Machine Learning | Data Analytics**
+
+📍 India

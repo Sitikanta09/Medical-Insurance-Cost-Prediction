@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+
+{% block title %}New Prediction | MedCost AI{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Calculate Medical Insurance Cost</h1>
+        <p class="page-subtitle">Provide your demographic and health metrics for instant ML price forecasting</p>
+    </div>
+    <div>
+        <a href="{{ url_for('main.dashboard') }}" class="btn btn-secondary">
+            &larr; Back to Dashboard
+        </a>
+    </div>
+</div>
+
+<div style="display: grid; grid-template-columns: 2fr 1fr; gap: 24px; align-items: start;">
+    <!-- Prediction Input Form Card -->
+    <div class="card">
+        <form id="predictForm" action="{{ url_for('prediction.predict') }}" method="POST">
+            <div class="form-grid">
+                <!-- 1. Age -->
+                <div class="form-group">
+                    <label class="form-label" for="age">Age (Years) <span style="color:var(--danger);">*</span></label>
+                    <input 
+                        type="number" 
+                        id="age" 
+                        name="age" 
+                        class="form-control" 
+                        placeholder="e.g. 28" 
+                        min="1" 
+                        max="120" 
+                        step="any"
+                        value="{{ form_data.age if form_data else '' }}"
+                        required
+                    >
+                    <div class="form-helper">Valid range: 1 to 120 years</div>
+                </div>
+
+                <!-- 2. Gender / Sex -->
+                <div class="form-group">
+                    <label class="form-label" for="sex">Gender <span style="color:var(--danger);">*</span></label>
+                    <select id="sex" name="sex" class="form-control" required>
+                        <option value="">-- Select Gender --</option>
+                        <option value="male" {% if form_data and form_data.sex == 'male' %}selected{% endif %}>Male</option>
+                        <option value="female" {% if form_data and form_data.sex == 'female' %}selected{% endif %}>Female</option>
+                    </select>
+                    <div class="form-helper">Biological sex demographic</div>
+                </div>
+
+                <!-- 3. BMI -->
+                <div class="form-group">
+                    <label class="form-label" for="bmi">Body Mass Index (BMI) <span style="color:var(--danger);">*</span></label>
+                    <input 
+                        type="number" 
+                        id="bmi" 
+                        name="bmi" 
+                        class="form-control" 
+                        placeholder="e.g. 26.5" 
+                        min="10.0" 
+                        max="70.0" 
+                        step="0.01"
+                        value="{{ form_data.bmi if form_data else '' }}"
+                        required
+                    >
+                    <div class="form-helper">Normal reference range is 18.5 – 24.9</div>
+                </div>
+
+                <!-- 4. Children -->
+                <div class="form-group">
+                    <label class="form-label" for="children">Number of Children / Dependents <span style="color:var(--danger);">*</span></label>
+                    <input 
+                        type="number" 
+                        id="children" 
+                        name="children" 
+                        class="form-control" 
+                        placeholder="e.g. 0" 
+                        min="0" 
+                        max="20"
+                        value="{{ form_data.children if form_data else '' }}"
+                        required
+                    >
+                    <div class="form-helper">Dependents covered under insurance policy</div>
+                </div>
+
+                <!-- 5. Smoker -->
+                <div class="form-group">
+                    <label class="form-label" for="smoker">Smoking Status <span style="color:var(--danger);">*</span></label>
+                    <select id="smoker" name="smoker" class="form-control" required>
+                        <option value="">-- Select Smoking Status --</option>
+                        <option value="no" {% if form_data and form_data.smoker == 'no' %}selected{% endif %}>Non-Smoker</option>
+                        <option value="yes" {% if form_data and form_data.smoker == 'yes' %}selected{% endif %}>Smoker</option>
+                    </select>
+                    <div class="form-helper">Regular tobacco or smoking product use</div>
+                </div>
+
+                <!-- 6. Region -->
+                <div class="form-group">
+                    <label class="form-label" for="region">Residential Region <span style="color:var(--danger);">*</span></label>
+                    <select id="region" name="region" class="form-control" required>
+                        <option value="">-- Select Region --</option>
+                        <option value="southeast" {% if form_data and form_data.region == 'southeast' %}selected{% endif %}>Southeast</option>
+                        <option value="southwest" {% if form_data and form_data.region == 'southwest' %}selected{% endif %}>Southwest</option>
+                        <option value="northeast" {% if form_data and form_data.region == 'northeast' %}selected{% endif %}>Northeast</option>
+                        <option value="northwest" {% if form_data and form_data.region == 'northwest' %}selected{% endif %}>Northwest</option>
+                    </select>
+                    <div class="form-helper">Geographic residential territory</div>
+                </div>
+            </div>
+
+            <div style="margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--slate-200); display: flex; gap: 14px; justify-content: flex-end;">
+                <a href="{{ url_for('main.dashboard') }}" class="btn btn-secondary">
+                    Cancel
+                </a>
+                <button type="submit" id="predictSubmitBtn" class="btn btn-primary" style="padding: 12px 28px;">
+                    ✨ Calculate Prediction
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Info & Guidelines Card -->
+    <div>
+        <div class="card" style="background-color: var(--slate-100); border-color: var(--slate-300);">
+            <h3 style="font-size: 1.1rem; margin-bottom: 12px;">📋 Estimation Guide</h3>
+            <p style="font-size: 0.88rem; color: var(--slate-600); line-height: 1.6; margin-bottom: 14px;">
+                Our machine learning model processes your six parameters in strict mathematical sequence:
+            </p>
+            <ol style="margin-left: 20px; font-size: 0.85rem; color: var(--slate-700); line-height: 1.8; margin-bottom: 16px;">
+                <li><strong>Age:</strong> Chronological age in years</li>
+                <li><strong>Gender:</strong> Categorical encoding (0/1)</li>
+                <li><strong>BMI:</strong> Weight (kg) / Height (m)&sup2;</li>
+                <li><strong>Children:</strong> Number of covered dependents</li>
+                <li><strong>Smoker:</strong> Lifestyle binary factor</li>
+                <li><strong>Region:</strong> Geographic index</li>
+            </ol>
+            <div style="font-size: 0.8rem; color: var(--slate-500); border-top: 1px solid var(--slate-300); padding-top: 12px;">
+                🔒 All prediction data is saved securely to your personal account history.
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

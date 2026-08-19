@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+
+{% block title %}User Profile | MedCost AI{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">User Account & Profile</h1>
+        <p class="page-subtitle">Manage your account information and view your platform usage summary</p>
+    </div>
+    <div>
+        <a href="{{ url_for('main.dashboard') }}" class="btn btn-secondary">
+            &larr; Back to Dashboard
+        </a>
+    </div>
+</div>
+
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+    <!-- Account Information Card -->
+    <div class="card">
+        <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 24px;">
+            <div style="width: 64px; height: 64px; border-radius: 50%; background: linear-gradient(135deg, var(--primary), #38bdf8); color: white; display: flex; align-items: center; justify-content: center; font-size: 2rem; font-weight: 700;">
+                {{ user.username[0]|upper }}
+            </div>
+            <div>
+                <h2 style="font-size: 1.4rem;">{{ user.username }}</h2>
+                <p style="color: var(--slate-500); font-size: 0.85rem;">Account Member since: {{ user.created_at[:10] }}</p>
+            </div>
+        </div>
+
+        <form method="POST" action="{{ url_for('main.profile') }}">
+            <div class="form-group">
+                <label class="form-label" for="username_disp">Username</label>
+                <input 
+                    type="text" 
+                    id="username_disp" 
+                    class="form-control" 
+                    value="{{ user.username }}" 
+                    disabled 
+                    style="background-color: var(--slate-100); cursor: not-allowed;"
+                >
+                <div class="form-helper">Username is unique and cannot be modified.</div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="email">Contact Email</label>
+                <input 
+                    type="email" 
+                    id="email" 
+                    name="email" 
+                    class="form-control" 
+                    placeholder="Enter your email address" 
+                    value="{{ user.email or '' }}"
+                >
+                <div class="form-helper">Used for account notifications and communication.</div>
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="margin-top: 10px;">
+                Save Profile Changes
+            </button>
+        </form>
+    </div>
+
+    <!-- Usage & Activity Summary Card -->
+    <div class="card">
+        <h2 style="font-size: 1.3rem; margin-bottom: 20px;">Platform Usage Overview</h2>
+
+        <div style="display: flex; flex-direction: column; gap: 16px;">
+            <div style="display: flex; justify-content: space-between; padding: 14px; background-color: var(--slate-50); border-radius: var(--radius-md); border: 1px solid var(--slate-200);">
+                <span style="font-weight: 600; color: var(--slate-700);">Total Predictions Generated</span>
+                <span style="font-weight: 700; color: var(--primary); font-size: 1.1rem;">{{ stats.total_predictions }}</span>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; padding: 14px; background-color: var(--slate-50); border-radius: var(--radius-md); border: 1px solid var(--slate-200);">
+                <span style="font-weight: 600; color: var(--slate-700);">Average Estimated Cost</span>
+                <span style="font-weight: 700; color: var(--secondary); font-size: 1.1rem;">
+                    {% if stats.avg_cost > 0 %}
+                        ₹{{ "{:,.2f}".format(stats.avg_cost) }}
+                    {% else %}
+                        N/A
+                    {% endif %}
+                </span>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; padding: 14px; background-color: var(--slate-50); border-radius: var(--radius-md); border: 1px solid var(--slate-200);">
+                <span style="font-weight: 600; color: var(--slate-700);">Last Active Prediction Date</span>
+                <span style="color: var(--slate-600); font-size: 0.9rem;">
+                    {{ stats.latest_date or 'No activity recorded' }}
+                </span>
+            </div>
+        </div>
+
+        <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid var(--slate-200); display: flex; justify-content: space-between; align-items: center;">
+            <a href="{{ url_for('prediction.history') }}" class="btn btn-outline btn-sm">
+                View Full History &rarr;
+            </a>
+            <a href="{{ url_for('auth.logout') }}" class="btn btn-danger btn-sm">
+                Sign Out
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

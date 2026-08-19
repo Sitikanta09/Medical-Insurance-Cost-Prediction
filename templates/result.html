@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+
+{% block title %}Prediction Result | MedCost AI{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Insurance Cost Prediction Result</h1>
+        <p class="page-subtitle">Estimated cost projection computed by our trained Linear Regression model</p>
+    </div>
+    <div style="display: flex; gap: 10px;">
+        <a href="{{ url_for('prediction.predict_form') }}" class="btn btn-primary">
+            ⚡ Make Another Prediction
+        </a>
+        <a href="{{ url_for('main.dashboard') }}" class="btn btn-secondary">
+            &larr; Dashboard
+        </a>
+    </div>
+</div>
+
+<!-- Hero Highlight Card -->
+<div class="result-hero">
+    <div class="result-tag">✨ Model Projection Result</div>
+    <div class="result-amount">
+        {% if prediction %}
+            ₹{{ "{:,.2f}".format(prediction.predicted_cost) }}
+        {% else %}
+            {{ prediction_text }}
+        {% endif %}
+    </div>
+    <p class="result-notice">
+        Estimated Annual Insurance Charge (Based on 6 Demographic & Lifestyle Features)
+    </p>
+</div>
+
+<!-- Breakdown & Input Parameters Card -->
+<div class="card">
+    <h2 style="font-size: 1.3rem; margin-bottom: 20px;">Input Features Summary</h2>
+    
+    {% if prediction %}
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 24px;">
+            <div style="background-color: var(--slate-50); padding: 16px; border-radius: var(--radius-md); border: 1px solid var(--slate-200);">
+                <div style="font-size: 0.8rem; color: var(--slate-500); text-transform: uppercase;">Age</div>
+                <div style="font-size: 1.2rem; font-weight: 700; color: var(--secondary); margin-top: 4px;">{{ prediction.age|int }} Years</div>
+            </div>
+
+            <div style="background-color: var(--slate-50); padding: 16px; border-radius: var(--radius-md); border: 1px solid var(--slate-200);">
+                <div style="font-size: 0.8rem; color: var(--slate-500); text-transform: uppercase;">Gender</div>
+                <div style="font-size: 1.2rem; font-weight: 700; color: var(--secondary); margin-top: 4px;">{{ prediction.sex|capitalize }}</div>
+            </div>
+
+            <div style="background-color: var(--slate-50); padding: 16px; border-radius: var(--radius-md); border: 1px solid var(--slate-200);">
+                <div style="font-size: 0.8rem; color: var(--slate-500); text-transform: uppercase;">BMI</div>
+                <div style="font-size: 1.2rem; font-weight: 700; color: var(--secondary); margin-top: 4px;">{{ prediction.bmi }}</div>
+            </div>
+
+            <div style="background-color: var(--slate-50); padding: 16px; border-radius: var(--radius-md); border: 1px solid var(--slate-200);">
+                <div style="font-size: 0.8rem; color: var(--slate-500); text-transform: uppercase;">Children</div>
+                <div style="font-size: 1.2rem; font-weight: 700; color: var(--secondary); margin-top: 4px;">{{ prediction.children }}</div>
+            </div>
+
+            <div style="background-color: var(--slate-50); padding: 16px; border-radius: var(--radius-md); border: 1px solid var(--slate-200);">
+                <div style="font-size: 0.8rem; color: var(--slate-500); text-transform: uppercase;">Smoker</div>
+                <div style="font-size: 1.2rem; font-weight: 700; margin-top: 4px;">
+                    <span class="badge badge-{{ prediction.smoker }}">
+                        {{ 'Yes' if prediction.smoker == 'yes' else 'No' }}
+                    </span>
+                </div>
+            </div>
+
+            <div style="background-color: var(--slate-50); padding: 16px; border-radius: var(--radius-md); border: 1px solid var(--slate-200);">
+                <div style="font-size: 0.8rem; color: var(--slate-500); text-transform: uppercase;">Region</div>
+                <div style="font-size: 1.2rem; font-weight: 700; color: var(--secondary); margin-top: 4px;">
+                    <span class="badge badge-region">{{ prediction.region|capitalize }}</span>
+                </div>
+            </div>
+        </div>
+
+        <div style="font-size: 0.85rem; color: var(--slate-500); margin-bottom: 24px;">
+            🕒 Record ID #{{ prediction.id }} &bull; Calculated on: {{ prediction.created_at }}
+        </div>
+    {% endif %}
+
+    <!-- Action Buttons -->
+    <div style="display: flex; gap: 14px; flex-wrap: wrap;">
+        <a href="{{ url_for('prediction.predict_form') }}" class="btn btn-primary">
+            ⚡ Predict Another Profile
+        </a>
+        <a href="{{ url_for('prediction.history') }}" class="btn btn-outline">
+            🕒 View Prediction History
+        </a>
+        <a href="{{ url_for('main.dashboard') }}" class="btn btn-secondary">
+            📊 Return to Dashboard
+        </a>
+    </div>
+
+    <!-- Clear Disclaimer Box -->
+    <div class="disclaimer-box">
+        <strong>⚠️ Analytical Model Disclaimer:</strong>
+        This estimate is strictly a statistical prediction computed via an unweighted multi-variable regression model using sample demographic benchmarks. It does not represent an actual binding insurance policy quote, healthcare underwriting approval, or clinical health assessment. Actual insurance charges vary widely based on specific insurer policies, pre-existing conditions, state regulations, and selected coverage tiers.
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block title %}Create Account | MedCost AI{% endblock %}
+
+{% block content %}
+<div class="auth-wrapper">
+    <div class="auth-card">
+        <div style="text-align: center; margin-bottom: 28px;">
+            <div style="font-size: 2.5rem; margin-bottom: 10px;">📝</div>
+            <h2 style="font-size: 1.6rem; color: var(--secondary);">Create Account</h2>
+            <p style="color: var(--slate-500); font-size: 0.9rem; margin-top: 4px;">Get started with intelligent medical insurance cost forecasting</p>
+        </div>
+
+        <form action="{{ url_for('auth.register') }}" method="POST">
+            <div class="form-group">
+                <label class="form-label" for="username">Username</label>
+                <input 
+                    type="text" 
+                    id="username" 
+                    name="username" 
+                    class="form-control" 
+                    placeholder="Choose a unique username" 
+                    value="{{ username or '' }}"
+                    required 
+                    autofocus
+                >
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="email">Email Address <span style="font-size:0.8rem; color:var(--slate-400); font-weight:normal;">(Optional)</span></label>
+                <input 
+                    type="email" 
+                    id="email" 
+                    name="email" 
+                    class="form-control" 
+                    placeholder="name@example.com" 
+                    value="{{ email or '' }}"
+                >
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="password">Password</label>
+                <input 
+                    type="password" 
+                    id="password" 
+                    name="password" 
+                    class="form-control" 
+                    placeholder="Minimum 6 characters" 
+                    minlength="6"
+                    required
+                >
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="confirm_password">Confirm Password</label>
+                <input 
+                    type="password" 
+                    id="confirm_password" 
+                    name="confirm_password" 
+                    class="form-control" 
+                    placeholder="Re-enter password" 
+                    minlength="6"
+                    required
+                >
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block" style="padding: 13px; font-size: 1rem; margin-top: 10px;">
+                Complete Registration
+            </button>
+        </form>
+
+        <div style="text-align: center; margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--slate-200); font-size: 0.9rem; color: var(--slate-600);">
+            Already have an account? 
+            <a href="{{ url_for('auth.login') }}" style="color: var(--primary); font-weight: 600; text-decoration: none;">Sign In</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

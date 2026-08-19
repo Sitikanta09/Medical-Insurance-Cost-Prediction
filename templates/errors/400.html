@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}400 Bad Request | MedCost AI{% endblock %}
+{% block content %}
+<div class="card" style="max-width: 550px; margin: 60px auto; text-align: center; padding: 40px 30px;">
+    <div style="font-size: 3.5rem; margin-bottom: 12px;">⚠️</div>
+    <h1 style="font-size: 2rem; color: var(--secondary); margin-bottom: 8px;">400 - Bad Request</h1>
+    <p style="color: var(--slate-600); font-size: 0.95rem; margin-bottom: 24px;">
+        The request could not be processed due to invalid or malformed data syntax.
+    </p>
+    <a href="{{ url_for('main.home') }}" class="btn btn-primary">
+        Return to Home
+    </a>
+</div>
+{% endblock %}

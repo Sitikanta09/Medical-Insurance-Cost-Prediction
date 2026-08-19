@@ -1,0 +1,152 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard | MedCost AI{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Welcome back, {{ username }} 👋</h1>
+        <p class="page-subtitle">Your Medical Insurance Cost Prediction analytics & overview</p>
+    </div>
+    <div>
+        <a href="{{ url_for('prediction.predict_form') }}" class="btn btn-primary">
+            ⚡ Run New Prediction
+        </a>
+    </div>
+</div>
+
+<!-- Summary Metrics Grid -->
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-icon-wrapper stat-icon-blue">
+            📈
+        </div>
+        <div>
+            <div class="stat-label">Total Predictions</div>
+            <div class="stat-value">{{ stats.total_predictions }}</div>
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon-wrapper stat-icon-green">
+            💰
+        </div>
+        <div>
+            <div class="stat-label">Latest Predicted Cost</div>
+            <div class="stat-value">
+                {% if stats.latest_cost is not none %}
+                    ₹{{ "{:,.2f}".format(stats.latest_cost) }}
+                {% else %}
+                    <span style="font-size:1rem; color:var(--slate-400);">No data</span>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon-wrapper stat-icon-amber">
+            📊
+        </div>
+        <div>
+            <div class="stat-label">Average Estimate</div>
+            <div class="stat-value">
+                {% if stats.avg_cost > 0 %}
+                    ₹{{ "{:,.2f}".format(stats.avg_cost) }}
+                {% else %}
+                    <span style="font-size:1rem; color:var(--slate-400);">No data</span>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Start & Recent Predictions -->
+<div style="display: grid; grid-template-columns: 2fr 1fr; gap: 24px;">
+    <!-- Recent Activity Table -->
+    <div class="card" style="margin-bottom:0;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h2 style="font-size: 1.25rem;">Recent Prediction History</h2>
+            <a href="{{ url_for('prediction.history') }}" style="color: var(--primary); font-size: 0.9rem; font-weight: 600; text-decoration: none;">
+                View All &rarr;
+            </a>
+        </div>
+
+        {% if recent_predictions %}
+            <div class="table-responsive">
+                <table class="custom-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Profile</th>
+                            <th>Smoker</th>
+                            <th>Region</th>
+                            <th>Predicted Cost</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in recent_predictions %}
+                            <tr>
+                                <td>{{ item.created_at[:10] }}</td>
+                                <td>{{ item.age|int }} yrs &bull; {{ item.sex|capitalize }} &bull; BMI {{ item.bmi }}</td>
+                                <td>
+                                    <span class="badge badge-{{ item.smoker }}">
+                                        {{ 'Smoker' if item.smoker == 'yes' else 'Non-Smoker' }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="badge badge-region">
+                                        {{ item.region|capitalize }}
+                                    </span>
+                                </td>
+                                <td style="font-weight: 700; color: var(--primary);">
+                                    ₹{{ "{:,.2f}".format(item.predicted_cost) }}
+                                </td>
+                                <td>
+                                    <a href="{{ url_for('prediction.result', prediction_id=item.id) }}" class="btn btn-outline btn-sm">
+                                        View
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div style="text-align: center; padding: 40px 20px; color: var(--slate-500);">
+                <div style="font-size: 2.5rem; margin-bottom: 10px;">📋</div>
+                <h3 style="font-size: 1.1rem; color: var(--slate-700);">No predictions yet</h3>
+                <p style="font-size: 0.9rem; margin-top: 4px; margin-bottom: 18px;">Run your first insurance cost estimation using our trained ML model.</p>
+                <a href="{{ url_for('prediction.predict_form') }}" class="btn btn-primary btn-sm">
+                    Start Prediction
+                </a>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Quick Help & ML Model Info Card -->
+    <div>
+        <div class="card" style="background-color: var(--slate-800); color: white; border: none; margin-bottom: 20px;">
+            <div style="font-size: 1.8rem; margin-bottom: 10px;">⚡</div>
+            <h3 style="color: white; font-size: 1.2rem; margin-bottom: 8px;">Fast & Accurate AI Estimator</h3>
+            <p style="color: var(--slate-400); font-size: 0.88rem; line-height: 1.6; margin-bottom: 20px;">
+                Calculate estimated annual healthcare premium costs instantly based on your age, lifestyle factors, and geographic region.
+            </p>
+            <a href="{{ url_for('prediction.predict_form') }}" class="btn btn-primary btn-block" style="background-color: #38bdf8; color: #0f172a; font-weight: 700; border: none;">
+                Predict Insurance Cost
+            </a>
+        </div>
+
+        <div class="card">
+            <h3 style="font-size: 1.1rem; margin-bottom: 12px;">Model Specifications</h3>
+            <ul style="list-style: none; font-size: 0.88rem; color: var(--slate-600); line-height: 1.8;">
+                <li><strong>Algorithm:</strong> Linear Regression</li>
+                <li><strong>Features Analyzed:</strong> 6 Key Demographic & Health Factors</li>
+                <li><strong>Input Pipeline:</strong> Direct (1, 6) Matrix Contract</li>
+                <li><strong>Data Privacy:</strong> User-isolated history database</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}403 Forbidden | MedCost AI{% endblock %}
+{% block content %}
+<div class="card" style="max-width: 550px; margin: 60px auto; text-align: center; padding: 40px 30px;">
+    <div style="font-size: 3.5rem; margin-bottom: 12px;">🚫</div>
+    <h1 style="font-size: 2rem; color: var(--secondary); margin-bottom: 8px;">403 - Forbidden</h1>
+    <p style="color: var(--slate-600); font-size: 0.95rem; margin-bottom: 24px;">
+        You do not have permission to access the requested resource or prediction record.
+    </p>
+    <a href="{{ url_for('main.dashboard') }}" class="btn btn-primary">
+        Go to Dashboard
+    </a>
+</div>
+{% endblock %}

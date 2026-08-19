@@ -76,11 +76,6 @@ The application provides a complete user workflow including registration, authen
 
 The application currently uses a **XGB Regressor** model stored in `model.pkl`.
 
-The model accepts the following six features:
-
-```text
-[age, sex, bmi, children, smoker, region]
-
 ---
 
 ## 👨‍💻 Author
@@ -90,3 +85,25 @@ The model accepts the following six features:
 **MCA | Software Development | Machine Learning | Data Analytics**
 
 📍 India
+
+---
+
+## 📄 License
+
+This project is developed for **educational and portfolio purposes**.
+
+---
+
+<div align="center">
+
+### 🏥 Medical Insurance Cost Prediction
+
+**Built with Python • Flask • Machine Learning • SQLite • HTML • CSS • JavaScript**
+
+⭐ If you found this project useful, consider giving the repository a star!
+
+<br>
+
+**© 2026 Sitikanta Dash. All Rights Reserved.**
+
+</div>

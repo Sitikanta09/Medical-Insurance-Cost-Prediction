@@ -1,4 +1,5 @@
 from database import get_db
+import sqlite3
 
 class PredictionModel:
     """Encapsulates persistent database operations for ML Predictions."""
@@ -7,18 +8,25 @@ class PredictionModel:
     def create(user_id, age, sex, bmi, children, smoker, region, predicted_cost):
         """
         Record a newly generated prediction for a user.
+        Ensures foreign key constraints are met.
         Returns the inserted prediction dictionary.
         """
         db = get_db()
-        cursor = db.execute(
-            """
-            INSERT INTO predictions (user_id, age, sex, bmi, children, smoker, region, predicted_cost)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-            """,
-            (user_id, float(age), str(sex), float(bmi), int(children), str(smoker), str(region), float(predicted_cost))
-        )
-        db.commit()
-        return PredictionModel.get_by_id(cursor.lastrowid, user_id)
+        try:
+            cursor = db.execute(
+                """
+                INSERT INTO predictions (user_id, age, sex, bmi, children, smoker, region, predicted_cost)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                (int(user_id), float(age), str(sex), float(bmi), int(children), str(smoker), str(region), float(predicted_cost))
+            )
+            db.commit()
+            return PredictionModel.get_by_id(cursor.lastrowid, user_id)
+        except sqlite3.IntegrityError as e:
+            db.rollback()
+            if "foreign key" in str(e).lower():
+                raise ValueError(f"Cannot save prediction: User ID {user_id} does not exist in the database.") from e
+            raise
 
     @staticmethod
     def get_by_id(prediction_id, user_id):

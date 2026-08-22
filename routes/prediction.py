@@ -1,7 +1,9 @@
-from flask import Blueprint, render_template, request, redirect, url_for, session, flash, abort
+from flask import Blueprint, render_template, request, redirect, url_for, session, flash, abort, g
 from routes import login_required
+from models.user import UserModel
 from models.prediction import PredictionModel
 from services.ml_service import MLService
+import sqlite3
 
 prediction_bp = Blueprint('prediction', __name__)
 
@@ -19,20 +21,27 @@ def predict():
     Handles form submission, validates 6 inputs, performs ML inference,
     records prediction in persistent database, and redirects to result page.
     """
-    user_id = session['user_id']
+    user_id = session.get('user_id')
     raw_data = request.form.to_dict()
 
-    # Step 1: Validate inputs
+    # Step 1: Verify user exists in database to prevent foreign key errors
+    user = UserModel.get_by_id(user_id)
+    if not user:
+        session.clear()
+        flash('User account not found or session has expired. Please sign in or create an account.', 'warning')
+        return redirect(url_for('auth.login'))
+
+    # Step 2: Validate inputs
     cleaned_data, error_msg = MLService.validate_inputs(raw_data)
     if error_msg:
         flash(error_msg, 'danger')
         return render_template('predict.html', form_data=raw_data)
 
     try:
-        # Step 2: Run inference through MLService (preserves 6-feature LinearRegression contract)
+        # Step 3: Run inference through MLService (preserves 6-feature LinearRegression contract)
         predicted_cost, formatted_text = MLService.predict(cleaned_data)
 
-        # Step 3: Persist prediction to database
+        # Step 4: Persist prediction to database
         saved_prediction = PredictionModel.create(
             user_id=user_id,
             age=cleaned_data['age'],
@@ -47,6 +56,9 @@ def predict():
         flash('Prediction calculated successfully!', 'success')
         return redirect(url_for('prediction.result', prediction_id=saved_prediction['id']))
 
+    except (ValueError, sqlite3.IntegrityError) as e:
+        flash(f"Database error: {str(e)}", 'danger')
+        return render_template('predict.html', form_data=raw_data)
     except Exception as e:
         flash(f"An unexpected error occurred during prediction: {str(e)}", 'danger')
         return render_template('predict.html', form_data=raw_data)
@@ -58,7 +70,7 @@ def result(prediction_id):
     Renders professional prediction result dashboard with non-medical ML estimate disclaimer.
     Strictly prevents cross-user access.
     """
-    user_id = session['user_id']
+    user_id = session.get('user_id')
     prediction_record = PredictionModel.get_by_id(prediction_id, user_id)
     if not prediction_record:
         flash('Prediction record not found or access denied.', 'warning')
@@ -77,7 +89,7 @@ def result(prediction_id):
 @login_required
 def history():
     """Paginated, filterable, and searchable prediction history."""
-    user_id = session['user_id']
+    user_id = session.get('user_id')
     search = request.args.get('search', '').strip()
     region_filter = request.args.get('region', '').strip()
     smoker_filter = request.args.get('smoker', '').strip()
@@ -107,7 +119,7 @@ def history():
 @login_required
 def delete_history(prediction_id):
     """Delete a prediction record owned by the current user."""
-    user_id = session['user_id']
+    user_id = session.get('user_id')
     success = PredictionModel.delete(prediction_id, user_id)
     if success:
         flash('Prediction record deleted successfully.', 'info')

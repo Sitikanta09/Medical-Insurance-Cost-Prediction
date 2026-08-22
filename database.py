@@ -1,10 +1,18 @@
+import os
 import sqlite3
+from pathlib import Path
 from flask import g, current_app
 
 def get_db():
     """Get or create SQLite database connection for current request context."""
     if 'db' not in g:
         db_path = current_app.config.get('DATABASE_PATH', 'insurance_app.db')
+        
+        # Ensure parent directory exists
+        db_dir = os.path.dirname(os.path.abspath(db_path))
+        if db_dir and not os.path.exists(db_dir):
+            os.makedirs(db_dir, exist_ok=True)
+
         g.db = sqlite3.connect(db_path)
         g.db.row_factory = sqlite3.Row
         # Enable Foreign Key support in SQLite

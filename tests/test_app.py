@@ -19,6 +19,7 @@ class TestApplicationEndToEnd(unittest.TestCase):
     - ML Prediction execution & persistence
     - Prediction History & User Isolation
     - History Deletion
+    - Stale Session / Foreign Key Protection
     """
 
     def setUp(self):
@@ -97,6 +98,33 @@ class TestApplicationEndToEnd(unittest.TestCase):
             # Expect redirect (302) to login page
             self.assertEqual(res.status_code, 302, f"Endpoint {endpoint} was not protected!")
             self.assertIn('/login', res.headers.get('Location', ''))
+
+    def test_stale_session_foreign_key_protection(self):
+        """Verify that a session with an orphaned/non-existent user_id is gracefully redirected without crashing."""
+        with self.client.session_transaction() as sess:
+            sess['user_id'] = 99999  # User ID not in database
+            sess['username'] = 'ghost_user'
+
+        # Attempt to access predict form
+        res_form = self.client.get('/predict-form', follow_redirects=True)
+        self.assertEqual(res_form.status_code, 200)
+        self.assertIn(b'session is invalid', res_form.data)
+
+        # Attempt to submit a prediction with stale session
+        with self.client.session_transaction() as sess:
+            sess['user_id'] = 99999
+            sess['username'] = 'ghost_user'
+
+        res_post = self.client.post('/predict', data={
+            'age': '30',
+            'sex': 'male',
+            'bmi': '25.0',
+            'children': '0',
+            'smoker': 'no',
+            'region': 'southwest'
+        }, follow_redirects=True)
+        self.assertEqual(res_post.status_code, 200)
+        self.assertIn(b'session is invalid', res_post.data)
 
     def test_prediction_workflow_and_persistence(self):
         """Test full prediction submission, result calculation, and history listing."""
